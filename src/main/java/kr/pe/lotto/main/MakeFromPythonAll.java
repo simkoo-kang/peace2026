@@ -66,7 +66,7 @@ public class MakeFromPythonAll extends LottoMain {
 		String filteredFilename = filteredname.replace("{round}", roundStr);
 		String currentFilename = filename.replace("{round}", roundStr);
 
-		filename = filename.replace("{round}", "" + round);
+//		filename = filename.replace("{round}", "" + round);
 		List<NumberVO> numList = LottoUtil.loadNumbers(allFilename);
 		if (Str.isEmpty(numList)) {
 			this.logger.debug("There's nothing in file[{}].!", allFilename);

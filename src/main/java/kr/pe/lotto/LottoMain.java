@@ -159,8 +159,9 @@ public abstract class LottoMain {
 		String lf = Str.LF;
 		StringBuilder sb = new StringBuilder();
 		for (NumberVO vo : lastnumbers) {
-			sb.append(lf).append(vo);
+			sb.append(lf).append(vo.toStringSum());
 		}
+		this.logger.debug("{}에 저장하였습니다. append({})", filename, append);
 		toSave(filename, sb.toString(), append);
 	}
 
@@ -173,8 +174,9 @@ public abstract class LottoMain {
 		String lf = Str.LF;
 		StringBuilder sb = new StringBuilder();
 		for (NumberVO vo : lastnumbers) {
-			sb.append(lf).append(vo);
+			sb.append(lf).append(vo.toStringSum());
 		}
+		this.logger.debug("{}에 저장하였습니다. append({})", file.getAbsolutePath(), append);
 		toSave(file, sb.toString(), append);
 	}
 
@@ -185,6 +187,7 @@ public abstract class LottoMain {
 	 */
 	protected void toSave(String filename, String content, boolean append) {
 		try {
+			this.logger.debug("{}에 저장하였습니다. append({})", filename, append);
 			FileUtil.write(filename, content, append);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -198,6 +201,7 @@ public abstract class LottoMain {
 	 */
 	protected void toSave(File file, String content, boolean append) {
 		try {
+			this.logger.debug("{}에 저장하였습니다. append({})", file.getAbsolutePath(), append);
 			FileUtil.write(file, content, append);
 		} catch (IOException e) {
 			e.printStackTrace();

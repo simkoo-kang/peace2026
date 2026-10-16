@@ -22,6 +22,22 @@ public class Shooter {
 		this.bullets = bullets;
 	}
 
+	@Override
+	public String toString() {
+		return "Shooter [color=" + this.color + ", bullets=" + this.bullets + "]";
+	}
+
+	/**
+	 * <pre>
+	 * copy me
+	 * </pre>
+	 * 
+	 * @return
+	 */
+	public Shooter copyMe() {
+		return new Shooter(this.color, this.bullets);
+	}
+
 	public boolean isColor(String color) {
 		return color.equals(this.color);
 	}
