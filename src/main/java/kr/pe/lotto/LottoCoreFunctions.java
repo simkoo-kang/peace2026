@@ -22,19 +22,11 @@ import kr.pe.lotto.filter.mm.ConsecutivePairsMaxFilter;
 import kr.pe.lotto.filter.mm.FirstNumberMaxFilter;
 import kr.pe.lotto.filter.mm.Last10MinFilter;
 import kr.pe.lotto.filter.mm.LastNumberMinFilter;
-import kr.pe.lotto.filter.mm.NumberZoneCountMaxFilter;
 import kr.pe.lotto.filter.mm.WinningRankGroupMaxFilter;
-import kr.pe.lotto.filter.range.CompositionRangeFilter;
 import kr.pe.lotto.filter.range.EvenRangeFilter;
 import kr.pe.lotto.filter.range.HLineRangeFilter;
 import kr.pe.lotto.filter.range.HighRangeFilter;
 import kr.pe.lotto.filter.range.MatchCountRangeFilter;
-import kr.pe.lotto.filter.range.MultipleRangeFilter;
-import kr.pe.lotto.filter.range.PairsDdangRangeFilter;
-import kr.pe.lotto.filter.range.PrimeRangeFilter;
-import kr.pe.lotto.filter.range.SameEndingRangeFilter;
-import kr.pe.lotto.filter.range.SectionRangeFilter;
-import kr.pe.lotto.filter.range.SumEndingRangeFilter;
 import kr.pe.lotto.filter.range.VLineRangeFilter;
 import kr.pe.lotto.vo.NumberInfoVO;
 import kr.pe.util.Arr;
@@ -53,6 +45,14 @@ public class LottoCoreFunctions {
 
 	private static LottoCoreFunctions instance = null;
 
+	/**
+	 * <pre>
+	 * 싱글톤 생성
+	 * </pre>
+	 * 
+	 * @param lottoList
+	 * @return
+	 */
 	public static LottoCoreFunctions getInstance(List<NumberInfoVO> lottoList) {
 		if (instance == null) {
 			instance = new LottoCoreFunctions(lottoList);
@@ -83,7 +83,7 @@ public class LottoCoreFunctions {
 
 		this.getLastVo();
 
-		this.appendFilters();
+//		this.appendFilters();
 
 		logger.debug("base lotto filters {}개 -----", this.filters.size());
 
@@ -106,7 +106,7 @@ public class LottoCoreFunctions {
 	 * </pre>
 	 *
 	 */
-	private void appendFilters() {
+	protected void appendFilters() {
 		int[] last10 = this.getNumbersFromLast(10);
 		logger.debug("last10: {} {}", last10.length, Arrays.toString(last10));
 
@@ -192,15 +192,15 @@ public class LottoCoreFunctions {
 		filters.add(new VLineRangeFilter("VLines", 3, 5, 3));
 
 		// 동일 끝수 1개(모든 끝수가 다른 경우) 또는 2개(한 개가 같은 경우)
-		filters.add(new SameEndingRangeFilter("동일끝수", 1, 2));
+//		filters.add(new SameEndingRangeFilter("동일끝수", 1, 2));
 		// 끝수 합계가 지정한 범위(12~38) 안인지 검사합니다.
-		filters.add(new SumEndingRangeFilter("끝수합", 12, 38));
+//		filters.add(new SumEndingRangeFilter("끝수합", 12, 38));
 		// 번호대별 최대 수량 <= 3, 전멸 구간 <= 2
-		filters.add(new NumberZoneCountMaxFilter("번호대", 3, 2));
+//		filters.add(new NumberZoneCountMaxFilter("번호대", 3, 2));
 
 		// 5구간, 9구간 - 최소 3-5구간, max 3개
-		filters.add(new SectionRangeFilter("5구간", 3, 5, 3, 9));
-		filters.add(new SectionRangeFilter("9구간", 4, 6, 3, 5));
+//		filters.add(new SectionRangeFilter("5구간", 3, 5, 3, 9));
+//		filters.add(new SectionRangeFilter("9구간", 4, 6, 3, 5));
 
 		// [ 1, 2, 6, 7, 8, 9, 13, 14, 29, 30, 34, 35, 36, 37, 41, 42, 43, 44, 45 ]
 //		filters.add(new CornerCountRangeFilter("모서리", 1, 4));
@@ -208,15 +208,15 @@ public class LottoCoreFunctions {
 //			filters.add(new FondantMaxFilter("퐁당퐁당" + (idx + 1), 6, idx));
 //		}
 
-		filters.add(new MultipleRangeFilter("3의 배수", 0, 3, 3));
-		filters.add(new MultipleRangeFilter("5의 배수", 0, 3, 5));
+//		filters.add(new MultipleRangeFilter("3의 배수", 0, 3, 3));
+//		filters.add(new MultipleRangeFilter("5의 배수", 0, 3, 5));
 
-		filters.add(new PrimeRangeFilter("솟수", 0, 3));
+//		filters.add(new PrimeRangeFilter("솟수", 0, 3));
 
-		filters.add(new PairsDdangRangeFilter("쌍수", 0, 1, 0));
-		filters.add(new PairsDdangRangeFilter("광땡", 0, 1, 1));
+//		filters.add(new PairsDdangRangeFilter("쌍수", 0, 1, 0));
+//		filters.add(new PairsDdangRangeFilter("광땡", 0, 1, 1));
 
-		filters.add(new CompositionRangeFilter("합성수", 0, 3));
+//		filters.add(new CompositionRangeFilter("합성수", 0, 3));
 
 //		for (int idx = 0; idx < NeverRangeFilter.maxCount; idx++) {
 //			filters.add(new NeverRangeFilter("Never" + (idx + 1), 1, 5, idx));

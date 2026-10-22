@@ -346,7 +346,7 @@ public class LottoAIMain extends LottoMain {
 	 */
 	public static void main(String[] args) {
 		int games = 9;
-		int tried = 15 * 10000;
+		int tried = 20 * 10000;
 		int lowSum = 90, highSum = 179;
 		String allfilename = "D:\\Workspace\\vscode\\lotto\\conf\\make\\{round}_all.txt";
 		String filename = "D:\\Workspace\\vscode\\lotto\\conf\\make\\{round}.txt";

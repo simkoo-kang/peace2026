@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -80,8 +81,6 @@ public class ShooterMain3 {
 				this.readyQueue.offer(ready);
 			}
 		}
-
-		this.solve();
 	}
 
 	/**
@@ -174,8 +173,19 @@ public class ShooterMain3 {
 				.toArray(SCell[]::new)).toArray(SCell[][]::new);
 	}
 
-	// 1. 외부에서 최초 호출하는 진입점 메서드
-	public List<String> solve() {
+	private boolean isValid = true;
+
+	/**
+	 * <pre>
+	 * 1. 외부에서 최초 호출하는 진입점 메서드
+	 * </pre>
+	 * 
+	 * @return
+	 */
+	public List<String> solve(Round round) {
+		this.isValid = round.validate();
+		logger.debug("validate={}", this.isValid);
+
 		List<Shooter> shooterList = new ArrayList<Shooter>();
 
 		// 최초 상태 생성
@@ -188,8 +198,19 @@ public class ShooterMain3 {
 		return dfs(initialCells, initialLoop, initialReady, shooterList, initialPaths);
 	}
 
-	int callCount = 0;
+	private int callCount = 0;
 
+	/**
+	 * <pre>
+	 * 게임을 완료했는지 검사
+	 * </pre>
+	 * 
+	 * @param cels
+	 * @param loopSts
+	 * @param readyQue
+	 * @param shts
+	 * @return
+	 */
 	private boolean isCompleted(SCell[][] cels, List<String> loopSts, Queue<String> readyQue, List<Shooter> shts) {
 		if (loopSts.size() < 1 && readyQue.size() < 1 && shts.size() < 1) {
 			int cellCount = count(cels, this.row_nums, this.col_nums);
@@ -199,10 +220,44 @@ public class ShooterMain3 {
 			}
 			logger.debug("data error![Up]");
 		}
+		if (this.isValid == false) {
+			List<SCell> ables = ableCells(cels, this.row_nums, this.col_nums);
+			if (readyQue.size() < 1 || ables.size() < 1) {
+				// 게임 데이터가 완전하지 않고, 더 이상 보충할 color 가 없으면
+				return true;
+			}
+		}
 		return false; // 격자가 남았다면 실패 경로이므로 null 반환
 	}
 
-	// 2. 실제 재귀적으로 작동하는 탐색 메서드
+	/**
+	 * <pre>
+	 * copy shooters
+	 * </pre>
+	 * 
+	 * @param list
+	 * @return
+	 */
+	private List<Shooter> copyShooters(List<Shooter> list) {
+		List<Shooter> newlist = new ArrayList<Shooter>();
+		for (Shooter s : list) {
+			newlist.add(new Shooter(s.getColor(), s.getBullets())); // 깊은 복사
+		}
+		return newlist;
+	}
+
+	/**
+	 * <pre>
+	 * 2. 실제 재귀적으로 작동하는 탐색 메서드
+	 * </pre>
+	 * 
+	 * @param cels
+	 * @param loopSts
+	 * @param readyQue
+	 * @param shts
+	 * @param paths
+	 * @return
+	 */
 	private List<String> dfs(SCell[][] cels, List<String> loopSts, Queue<String> readyQue, List<Shooter> shts,
 			List<String> paths) {
 		logger.debug("start dfs [call count = {}]-------------------------------", this.callCount++);
@@ -224,10 +279,7 @@ public class ShooterMain3 {
 		// 1. 슈터가 있으면 발사 및 처리 (원본을 해치지 않게 로컬 스코프에서 복사 후 진행)
 		List<String> nextLoopSts = new ArrayList<>(loopSts);
 		Queue<String> nextReadyQue = new LinkedList<>(readyQue);
-		List<Shooter> nextShts = new ArrayList<>();
-		for (Shooter s : shts) {
-			nextShts.add(new Shooter(s.getColor(), s.getBullets())); // 깊은 복사
-		}
+		List<Shooter> nextShts = copyShooters(shts);
 
 		if (0 < nextShts.size()) {
 			List<Shooter> removeSter = new ArrayList<Shooter>();
@@ -258,6 +310,7 @@ public class ShooterMain3 {
 				while (0 < removeSter.size() && 0 < nextShts.size()) {
 					Shooter shooter = removeSter.removeFirst();
 					nextShts.remove(shooter);
+					logger.debug(shooter.toString());
 				}
 			}
 		}
@@ -303,25 +356,31 @@ public class ShooterMain3 {
 
 			// 정렬 후 최고의 블록 '하나'만 선택
 			ableMap = Coll.sortMapByValueReverseOrder(ableMap);
-			Map.Entry<SCell, Integer> entry = ableMap.entrySet().iterator().next();
-			SCell colorCell = entry.getKey();
+//			Map.Entry<SCell, Integer> entry = ableMap.entrySet().iterator().next();
+//			SCell colorCell = entry.getKey();
+			for (Iterator<SCell> it = ableMap.keySet().iterator(); it.hasNext();) {
+				List<Shooter> currShooters = copyShooters(nextShts);
+				Queue<String> currReadyQue = new LinkedList<String>(nextReadyQue);
+				List<String> currLoop = new ArrayList<String>(nextLoopSts);
 
-			// 데이터 상태 변화 적용
-			nextShts.add(new Shooter(colorCell.getColor()));
-			SCell[][] nextCels = copyCells(cels);
-			nextCels[colorCell.getR()][colorCell.getC()].setColor(".");
+				SCell colorCell = it.next();
+				// 데이터 상태 변화 적용
+				currShooters.add(new Shooter(colorCell.getColor()));
+				SCell[][] currCels = copyCells(cels);
+				currCels[colorCell.getR()][colorCell.getC()].setColor(".");
 
-			String path = Str.format("📥 하단 격자 [{}행, {}열] 사각형 [{}] 블록 터치 ➔ 대포 장전", colorCell.getR() + 1,
-					colorCell.getC() + 1, colorCell.getColor());
-			logger.debug(path);
+				String path = Str.format("📥 하단 격자 [{}행, {}열] 사각형 [{}] 블록 터치 ➔ 대포 장전", colorCell.getR() + 1,
+						colorCell.getC() + 1, colorCell.getColor());
+				logger.debug(path);
 
-			List<String> nextPaths = new ArrayList<>(paths);
-			nextPaths.add(path);
+				List<String> currPaths = new ArrayList<>(paths);
+				currPaths.add(path);
 
-			// 🔄 [핵심 변경] 다음 상태를 가지고 자기 자신을 호출 (재귀 탐색)
-			List<String> result = dfs(nextCels, nextLoopSts, nextReadyQue, nextShts, nextPaths);
-			if (result != null) {
-				return result;
+				// 🔄 [핵심 변경] 다음 상태를 가지고 자기 자신을 호출 (재귀 탐색)
+				List<String> result = dfs(currCels, currLoop, currReadyQue, currShooters, currPaths);
+				if (result != null) {
+					return result;
+				}
 			}
 		} else {
 			logger.debug("대포 슬롯이 꽉 찼습니다. (진행 불가)");
@@ -449,12 +508,16 @@ public class ShooterMain3 {
 
 		// 불러온 데이터 확인 테스트
 		System.out.println("총 로드된 라운드 수: " + games.getRounds().size() + "개");
-		for (Round r : games.getRounds()) {
-			System.out.println(" - 라운드 [" + r.getId() + "] 불러오기 성공");
-		}
+//		for (Round r : games.getRounds()) {
+//			System.out.println(" - 라운드 [" + r.getId() + "] 불러오기 성공");
+//		}
 
-		String id = "7";
+		String id = "24";
 		Round round = games.getRound(id);
+//		if (round.validate() == false) {
+//			logger.debug("table[{}] is not valid!", id);
+//			return;
+//		}
 		Stages stage = round.getStages();
 		Readys ready = round.getReadys();
 		Grid grid = round.getGrid();
@@ -466,7 +529,7 @@ public class ShooterMain3 {
 		int firingLinesCount = 4;
 		logger.debug("round [{}] 시작합니다.------", id);
 		ShooterMain3 solver = new ShooterMain3(matrix, stages, readys, firingLinesCount);
-		List<String> paths = solver.solve();
+		List<String> paths = solver.solve(round);
 		if (paths == null || paths.size() == 0) {
 			logger.debug("path not found!");
 		} else {

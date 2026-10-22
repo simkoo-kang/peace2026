@@ -4,6 +4,7 @@
 package kr.pe.lotto.main;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -39,7 +40,7 @@ public class CheckWinNumbers extends LottoMain {
 	 * @param round
 	 * @return
 	 */
-	private List<NumberVO> getNumbersForMake(String filename, int round) {
+	private List<NumberVO> loadFromFile(String filename, int round) {
 		File file = new File(filename);
 		if (!file.exists()) {
 			this.logger.debug("{} not found", filename);
@@ -118,22 +119,36 @@ public class CheckWinNumbers extends LottoMain {
 		return money;
 	}
 
-	public void checkMake(String filename) {
+	/**
+	 * <pre></pre>
+	 * 
+	 * @param filename
+	 * @return
+	 */
+	public List<String> checkMake(String filename) {
 		NumberInfoVO lastVo = this.getLastVo();
 		int round = lastVo.getRound();
 		this.logger.debug(lastVo.toStringSum());
 		this.logger.debug("" + round);
 
+		List<String> res = new ArrayList<String>();
+
 		filename = filename.replace("{round}", "" + round);
-		List<NumberVO> numList = this.getNumbersForMake(filename, round);
+		List<NumberVO> numList = this.loadFromFile(filename, round);
 		if (Str.isEmpty(numList)) {
 			this.logger.debug("There's nothing to do.!");
-			return;
+			return res;
 		}
 
 		int[] selected = getNumber(numList);
 		this.logger.debug("select: {}, matched: {}", selected.length, Arr.contains(selected, lastVo.getNums6()));
+		res.add(Arr.toStringIntArray(selected, ","));
+		res.add(Arr.toStringIntArray(Arr.arrAnd(selected, lastVo.getNums6()), ","));
+		res.add(Str.format("select: {}, matched: {}", selected.length, Arr.contains(selected, lastVo.getNums6())));
+		res.add("make size = " + numList.size());
+		res.add("");
 
+		int[] wins = new int[] { 0, 0, 0, 0, 0 };
 		Map<Integer, List<CountMoneyVO>> map = new HashMap<>();
 		int[] winNums = lastVo.getNumberVO().getNums6();
 		int bonusNumber = lastVo.getBonus();
@@ -141,6 +156,7 @@ public class CheckWinNumbers extends LottoMain {
 		for (NumberVO vo : numList) {
 			int rank = check.check(vo.getNums());
 			if (0 < rank) {
+				wins[rank - 1]++;
 				List<CountMoneyVO> list = map.get(rank);
 				if (list == null) {
 					list = new ArrayList<>();
@@ -151,6 +167,20 @@ public class CheckWinNumbers extends LottoMain {
 		}
 		loggerRank(map);
 		this.logger.debug("make size = {}", numList.size());
+
+		boolean iswin = false;
+		for (int i = 0; i < wins.length; i++) {
+			if (0 < wins[i]) {
+				res.add((i + 1) + "등 " + Str.numberFormat(wins[i]));
+				iswin = true;
+			}
+		}
+		if (!iswin) {
+			res.add("당첨 내역이 없습니다.");
+		} else {
+			res.add("");
+		}
+		return res;
 	}
 
 	/**
@@ -184,14 +214,31 @@ public class CheckWinNumbers extends LottoMain {
 	public static void main(String[] args) {
 		CheckWinNumbers check = new CheckWinNumbers();
 
+		List<String> res = new ArrayList<String>();
+		NumberInfoVO ivo = check.getLastVo();
+		res.add("round: " + (ivo.getRound()));
+		res.add("당첨 번호: " + ivo.toStringSum(true));
+		res.add("");
+
 		String filename = "D:\\Workspace\\vscode\\lotto\\conf\\make\\{round}.txt";
-		check.checkMake(filename);
+		List<String> res1 = check.checkMake(filename);
+		res.add("select ---------------------");
+		res.addAll(res1);
+		res.add("");
 
 		filename = "D:\\Workspace\\vscode\\lotto\\conf\\make\\{round}_all.txt";
-		check.checkMake(filename);
+		List<String> res2 = check.checkMake(filename);
+		res.add("all ---------------------");
+		res.addAll(res2);
 
-		filename = "D:\\Workspace\\vscode\\lotto\\conf\\make\\{round}_filtered.txt";
-		check.checkMake(filename);
+		filename = "D:\\Workspace\\docs\\lotto\\result.txt";
+		try {
+			FileUtil.writeln(filename, Str.join(res, Str.CRLF));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+//		filename = "D:\\Workspace\\vscode\\lotto\\conf\\make\\{round}_filtered.txt";
+//		List<String> res3 = check.checkMake(filename);
 
 //		String text = "올해 2026년 내 나이는 30세입니다.";
 //

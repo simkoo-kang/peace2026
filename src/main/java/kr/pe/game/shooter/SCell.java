@@ -86,7 +86,7 @@ public class SCell {
 	 * @return
 	 */
 	public boolean isAble() {
-		return !(this.isWall() || this.isEmpty());
+		return !("#.?".contains(this.color));
 	}
 
 	/**

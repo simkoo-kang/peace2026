@@ -56,6 +56,28 @@ public class Grid {
 	}
 
 	/**
+	 * <pre>
+	 * 유효한 셀 가져오기 (#.) 제외
+	 * </pre>
+	 * 
+	 * @return
+	 */
+	public List<String> getColors() {
+		List<String> list = new ArrayList<String>();
+		if (this.rowList != null && 0 < this.rowList.size()) {
+			for (int r = 0; r < this.rows; r++) {
+				Row row = this.rowList.get(r);
+				for (String c : row.getCols()) {
+					if (!"#.".contains(c)) {
+						list.add(c);
+					}
+				}
+			}
+		}
+		return list;
+	}
+
+	/**
 	 * <pre></pre>
 	 * 
 	 * @return

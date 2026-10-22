@@ -125,9 +125,6 @@ public class GetLottoNumberFromFile extends LottoMain {
 					System.out.println(Arr.toStringIntArray(last));
 					ivo.setLast10(Arr.contains(last, nums));
 					System.out.println(ivo.getLast05() + " , " + ivo.getLast10());
-
-					this.logger.debug(ivo.toStringSum());
-					return null;
 				} else {
 					this.logger.debug("no matched!");
 				}
@@ -164,9 +161,7 @@ public class GetLottoNumberFromFile extends LottoMain {
 				}
 			}
 			return ivo;
-		} catch (
-
-		Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;

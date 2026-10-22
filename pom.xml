@@ -129,6 +129,14 @@
 	    <scope>compile</scope>
 	</dependency>
 
+	<!-- Source: https://mvnrepository.com/artifact/org.jclarion/image4j -->
+	<dependency>
+	    <groupId>org.jclarion</groupId>
+	    <artifactId>image4j</artifactId>
+	    <version>0.7</version>
+	    <scope>compile</scope>
+	</dependency>
+
   </dependencies>
   
 </project>
